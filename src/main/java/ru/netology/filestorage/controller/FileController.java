@@ -12,6 +12,7 @@ import ru.netology.filestorage.model.dto.FileDto;
 import ru.netology.filestorage.model.entity.File;
 import ru.netology.filestorage.service.FileService;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Optional;
 
