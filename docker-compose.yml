@@ -1,0 +1,9 @@
+version: "3.8"
+services:
+  app:
+    image: filestorage:1.0
+    build:
+      ./
+    ports:
+      - 8080:8080
+
