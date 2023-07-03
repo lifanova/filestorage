@@ -4,8 +4,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import ru.netology.filestorage.model.entity.File;
-import ru.netology.filestorage.model.entity.UserCredentials;
-import ru.netology.filestorage.service.UserCredentialsService;
+import ru.netology.filestorage.service.impl.UserCredentialsService;
 
 import java.io.IOException;
 import java.time.LocalDateTime;

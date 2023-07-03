@@ -1,4 +1,4 @@
-package ru.netology.filestorage.service;
+package ru.netology.filestorage.service.impl;
 
 import org.springframework.stereotype.Service;
 

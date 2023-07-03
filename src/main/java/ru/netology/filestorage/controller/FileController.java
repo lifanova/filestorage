@@ -8,32 +8,34 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.netology.filestorage.api.FileStorageApi;
+import ru.netology.filestorage.model.dto.EditNameRequest;
 import ru.netology.filestorage.model.dto.FileDto;
 import ru.netology.filestorage.model.entity.File;
-import ru.netology.filestorage.service.FileService;
+import ru.netology.filestorage.service.impl.FileServiceImpl;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Optional;
 
 @RestController
-public class FileController {
-    private final FileService fileService;
+public class FileController implements FileStorageApi {
+    private final FileServiceImpl fileService;
 
-    public FileController(FileService fileService) {
+    public FileController(FileServiceImpl fileService) {
         this.fileService = fileService;
     }
 
-    @PostMapping(path = "/file", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<FileDto> uploadFile(@RequestParam String filename, @RequestParam MultipartFile file) throws IOException {
-        FileDto savedFile = fileService.uploadFile(filename, file);
-        return new ResponseEntity<>(savedFile, HttpStatus.OK);
+    @GetMapping(path = "/list")
+    public Page<FileDto> listFiles(@RequestParam Optional<String> sort,
+                                   @RequestParam Optional<Integer> page,
+                                   @RequestParam Optional<Integer> limit) {
+        return fileService.listFiles(sort, page, limit);
     }
 
     @GetMapping(path = "file", produces = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<MultiValueMap<String, Object>> getFile(@RequestParam String filename) throws IOException {
+    public ResponseEntity<MultiValueMap<String, Object>> getFile(@RequestParam String filename) {
 
         File file = fileService.getFile(filename);
+
         MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
         ByteArrayResource byteArrayResource = new ByteArrayResource(file.getFile());
         HttpHeaders headers = new HttpHeaders();
@@ -45,21 +47,24 @@ public class FileController {
         return ResponseEntity.ok(formData);
     }
 
+    @PostMapping(path = "/file", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<FileDto> uploadFile(@RequestParam String filename, @RequestParam MultipartFile file) {
+        FileDto savedFile = fileService.uploadFile(filename, file);
+        return ResponseEntity.ok().body(savedFile);
+    }
+
+
+
     @PutMapping(path = "file", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void editFilename(@RequestParam("filename") String oldFilename, @RequestBody EditNameRequest editNameRequest) throws FileNotFoundException {
+    public void editFilename(@RequestParam("filename") String oldFilename, @RequestBody EditNameRequest editNameRequest) {
         fileService.editFilename(oldFilename, editNameRequest);
     }
 
     @DeleteMapping(path = "file")
-    public void deleteFile(@RequestParam String filename) throws FileNotFoundException {
+    public void deleteFile(@RequestParam String filename) {
         fileService.deleteFile(filename);
     }
 
-    @GetMapping(path = "/list")
-    public Page<FileDto> listFiles(@RequestParam Optional<String> sort,
-                                   @RequestParam Optional<Integer> page,
-                                   @RequestParam Optional<Integer> limit) {
-        return fileService.listFiles(sort, page, limit);
-    }
+
 
 }
