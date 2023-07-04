@@ -35,7 +35,7 @@ public class FileServiceImpl implements FileService {
         PageRequest pageRequest = PageRequest.of(page.orElse(0), limit.orElse(10), Sort.Direction.ASC, sort.orElse("id"));
         Page<File> pageFile = fileRepository.findFilesByUserCredentialsId(userCredentialsId, pageRequest);
 
-        return mapperUtil.mapEntityPageIntoDtoPage(pageFile, FileDto.class);
+        return mapperUtil.mapEntityIntoDto(pageFile, FileDto.class);
     }
 
     public File getFile(String filename) {
