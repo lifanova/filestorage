@@ -4,19 +4,20 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import ru.netology.filestorage.model.entity.File;
-import ru.netology.filestorage.service.impl.UserCredentialsService;
+import ru.netology.filestorage.service.impl.UserCredentialsServiceImpl;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 
 @Component
 public class FileUtil {
-    private final UserCredentialsService userCredentialsService;
+    private final UserCredentialsServiceImpl userCredentialsService;
 
-    public FileUtil(UserCredentialsService userCredentialsService) {
+    public FileUtil(UserCredentialsServiceImpl userCredentialsService) {
         this.userCredentialsService = userCredentialsService;
     }
 
+    //TODO: оформить через билдер
     public File createFileFromRequest(String filename, MultipartFile multipartFile) throws IOException {
         File file = new File();
         file.setName(filename);
@@ -40,7 +41,7 @@ public class FileUtil {
 
     public Long getFileOwnerUserCredentialsId() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userCredentialsService.loadUserCredentialsByUsername(username).getId();
+        return null;//userCredentialsService.loadUserCredentialsByUsername(username).getId();
     }
 
 }

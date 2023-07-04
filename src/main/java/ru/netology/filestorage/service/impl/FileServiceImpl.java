@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ru.netology.filestorage.exception.ErrorInputData;
 import ru.netology.filestorage.mapper.FileUtil;
 import ru.netology.filestorage.mapper.MapperUtil;
 import ru.netology.filestorage.model.dto.EditNameRequest;
@@ -14,6 +15,7 @@ import ru.netology.filestorage.repository.FileRepository;
 import ru.netology.filestorage.service.FileService;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Optional;
 
 @Service
@@ -32,15 +34,27 @@ public class FileServiceImpl implements FileService {
         Long userCredentialsId = fileUtil.getFileOwnerUserCredentialsId();
         PageRequest pageRequest = PageRequest.of(page.orElse(0), limit.orElse(10), Sort.Direction.ASC, sort.orElse("id"));
         Page<File> pageFile = fileRepository.findFilesByUserCredentialsId(userCredentialsId, pageRequest);
+
         return mapperUtil.mapEntityPageIntoDtoPage(pageFile, FileDto.class);
     }
 
     public File getFile(String filename) {
-        return fileRepository.findFileByNameEquals(fileUtil.getFileOwnerUserCredentialsId(), filename).orElseThrow(FileNotFoundException::new);
+        Optional<File> entity = fileRepository.findByName(fileUtil.getFileOwnerUserCredentialsId(), filename);
+
+        if (entity.isEmpty()) {
+            throw new ErrorInputData("Файл по запросу не найден!");
+        }
+
+        return entity.get();
     }
 
     public FileDto uploadFile(String filename, MultipartFile multipartFile) {
-        File file = fileUtil.createFileFromRequest(filename, multipartFile);
+        File file = null;
+        try {
+            file = fileUtil.createFileFromRequest(filename, multipartFile);
+        } catch (IOException e) {
+            throw new ErrorInputData(e.getMessage());
+        }
 
         File savedFile = fileRepository.saveAndFlush(file);
 
@@ -48,13 +62,23 @@ public class FileServiceImpl implements FileService {
     }
 
     public void editFilename(String oldFilename, EditNameRequest editNameRequest) {
-        File file = fileRepository.findFileByNameEquals(fileUtil.getFileOwnerUserCredentialsId(), oldFilename).orElseThrow(FileNotFoundException::new);
-        File withNewFilename = fileUtil.editFilename(file, editNameRequest.getNewFilename());
+        Optional<File> entity = fileRepository.findByName(fileUtil.getFileOwnerUserCredentialsId(), oldFilename);
+        if (entity.isEmpty()) {
+            throw new ErrorInputData("Файл по запросу не найден!");
+        }
+
+        File withNewFilename = fileUtil.editFilename(entity.get(), editNameRequest.getNewFilename());
+
         fileRepository.saveAndFlush(withNewFilename);
     }
 
     public void deleteFile(String filename) {
-        File file = fileRepository.findFileByNameEquals(fileUtil.getFileOwnerUserCredentialsId(), filename).orElseThrow(FileNotFoundException::new);
-        fileRepository.deleteById(file.getId());
+        Optional<File> entity = fileRepository.findByName(fileUtil.getFileOwnerUserCredentialsId(), filename);
+        if (entity.isEmpty()) {
+            throw new ErrorInputData("Файл по запросу не найден!");
+        }
+
+        // TODO: вернуть ответ
+        fileRepository.deleteById(entity.get().getId());
     }
 }

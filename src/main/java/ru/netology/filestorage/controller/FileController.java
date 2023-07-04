@@ -31,7 +31,7 @@ public class FileController implements FileStorageApi {
         return fileService.listFiles(sort, page, limit);
     }
 
-    @GetMapping(path = "file", produces = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @GetMapping(path = "/file", produces = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<MultiValueMap<String, Object>> getFile(@RequestParam String filename) {
 
         File file = fileService.getFile(filename);
@@ -53,9 +53,7 @@ public class FileController implements FileStorageApi {
         return ResponseEntity.ok().body(savedFile);
     }
 
-
-
-    @PutMapping(path = "file", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(path = "/file", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void editFilename(@RequestParam("filename") String oldFilename, @RequestBody EditNameRequest editNameRequest) {
         fileService.editFilename(oldFilename, editNameRequest);
     }
@@ -64,7 +62,4 @@ public class FileController implements FileStorageApi {
     public void deleteFile(@RequestParam String filename) {
         fileService.deleteFile(filename);
     }
-
-
-
 }

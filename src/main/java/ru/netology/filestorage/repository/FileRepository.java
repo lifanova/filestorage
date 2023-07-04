@@ -11,12 +11,12 @@ import ru.netology.filestorage.model.entity.File;
 import java.util.Optional;
 
 @Repository
-public class FileRepository extends JpaRepository<File, Long> {
+public interface FileRepository extends JpaRepository<File, Long> {
     @Query("from File f where f.userCredentials.id = :id and f.name = :name")
-    public Optional<File> findFileByNameEquals(@Param("id") Long id, @Param("name") String filename);
+    Optional<File> findByName(@Param("id") Long id, @Param("name") String filename);
 
     @Query(value = "from File f where f.userCredentials.id = :id",
             countQuery = "select count(f) from File f where f.userCredentials.id = :id")
-    public Page<File> findFilesByUserCredentialsId(@Param("id") Long id, Pageable pageable);
+    Page<File> findFilesByUserCredentialsId(@Param("id") Long id, Pageable pageable);
 
 }
