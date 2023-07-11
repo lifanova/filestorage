@@ -26,7 +26,7 @@ public class UserCredentials {
     private Role role;
 
     @OneToMany(mappedBy = "userCredentials", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<File> files = new HashSet<>();
+    private Set<FileEntity> files = new HashSet<>();
 
     @Column(columnDefinition = "boolean default true")
     private boolean AccountNonExpired;

@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Entity
 @Data
 @NoArgsConstructor
-public class File {
+public class FileEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,12 +25,15 @@ public class File {
     private String mimetype;
 
     @Column(nullable = false)
-    private LocalDateTime lastedited;
+    private LocalDateTime created;
+
+    @Column(nullable = false)
+    private LocalDateTime updated;
 
     @Lob
     @Type(type = "org.hibernate.type.BinaryType")
     @Column(nullable = false)
-    private byte[] file;
+    private byte[] bytes;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_credentials_id", referencedColumnName = "id")

@@ -6,17 +6,17 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import ru.netology.filestorage.model.entity.File;
+import ru.netology.filestorage.model.entity.FileEntity;
 
 import java.util.Optional;
 
 @Repository
-public interface FileRepository extends JpaRepository<File, Long> {
-    @Query("from File f where f.userCredentials.id = :id and f.name = :name")
-    Optional<File> findByName(@Param("id") Long id, @Param("name") String filename);
+public interface FileRepository extends JpaRepository<FileEntity, Long> {
+    @Query("from FileEntity f where f.userCredentials.id = :id and f.name = :name")
+    Optional<FileEntity> findByName(@Param("id") Long id, @Param("name") String filename);
 
-    @Query(value = "from File f where f.userCredentials.id = :id",
-            countQuery = "select count(f) from File f where f.userCredentials.id = :id")
-    Page<File> findFilesByUserCredentialsId(@Param("id") Long id, Pageable pageable);
+    @Query(value = "from FileEntity f where f.userCredentials.id = :id",
+            countQuery = "select count(f) from FileEntity f where f.userCredentials.id = :id")
+    Page<FileEntity> findFilesByUserCredentialsId(@Param("id") Long id, Pageable pageable);
 
 }

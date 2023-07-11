@@ -10,11 +10,10 @@ import ru.netology.filestorage.mapper.FileUtil;
 import ru.netology.filestorage.mapper.MapperUtil;
 import ru.netology.filestorage.model.dto.EditNameRequest;
 import ru.netology.filestorage.model.dto.FileDto;
-import ru.netology.filestorage.model.entity.File;
+import ru.netology.filestorage.model.entity.FileEntity;
 import ru.netology.filestorage.repository.FileRepository;
 import ru.netology.filestorage.service.FileService;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -30,16 +29,16 @@ public class FileServiceImpl implements FileService {
         this.mapperUtil = mapperUtil;
     }
 
-    public Page<FileDto> listFiles(Optional<String> sort, Optional<Integer> page, Optional<Integer> limit) {
+    public Page<FileDto> filesList(Optional<String> sort, Optional<Integer> page, Optional<Integer> limit) {
         Long userCredentialsId = fileUtil.getFileOwnerUserCredentialsId();
         PageRequest pageRequest = PageRequest.of(page.orElse(0), limit.orElse(10), Sort.Direction.ASC, sort.orElse("id"));
-        Page<File> pageFile = fileRepository.findFilesByUserCredentialsId(userCredentialsId, pageRequest);
+        Page<FileEntity> pageFile = fileRepository.findFilesByUserCredentialsId(userCredentialsId, pageRequest);
 
         return mapperUtil.mapEntityIntoDto(pageFile, FileDto.class);
     }
 
-    public File getFile(String filename) {
-        Optional<File> entity = fileRepository.findByName(fileUtil.getFileOwnerUserCredentialsId(), filename);
+    public FileEntity getFile(String filename) {
+        Optional<FileEntity> entity = fileRepository.findByName(fileUtil.getFileOwnerUserCredentialsId(), filename);
 
         if (entity.isEmpty()) {
             throw new ErrorInputData("Файл по запросу не найден!");
@@ -49,31 +48,31 @@ public class FileServiceImpl implements FileService {
     }
 
     public FileDto uploadFile(String filename, MultipartFile multipartFile) {
-        File file = null;
+        FileEntity file = null;
         try {
             file = fileUtil.createFileFromRequest(filename, multipartFile);
         } catch (IOException e) {
             throw new ErrorInputData(e.getMessage());
         }
 
-        File savedFile = fileRepository.saveAndFlush(file);
+        FileEntity savedFile = fileRepository.saveAndFlush(file);
 
         return mapperUtil.mapEntityIntoDto(savedFile, FileDto.class);
     }
 
     public void editFilename(String oldFilename, EditNameRequest editNameRequest) {
-        Optional<File> entity = fileRepository.findByName(fileUtil.getFileOwnerUserCredentialsId(), oldFilename);
+        Optional<FileEntity> entity = fileRepository.findByName(fileUtil.getFileOwnerUserCredentialsId(), oldFilename);
         if (entity.isEmpty()) {
             throw new ErrorInputData("Файл по запросу не найден!");
         }
 
-        File withNewFilename = fileUtil.editFilename(entity.get(), editNameRequest.getNewFilename());
+        FileEntity withNewFilename = fileUtil.editFilename(entity.get(), editNameRequest.getNewFilename());
 
         fileRepository.saveAndFlush(withNewFilename);
     }
 
     public void deleteFile(String filename) {
-        Optional<File> entity = fileRepository.findByName(fileUtil.getFileOwnerUserCredentialsId(), filename);
+        Optional<FileEntity> entity = fileRepository.findByName(fileUtil.getFileOwnerUserCredentialsId(), filename);
         if (entity.isEmpty()) {
             throw new ErrorInputData("Файл по запросу не найден!");
         }
