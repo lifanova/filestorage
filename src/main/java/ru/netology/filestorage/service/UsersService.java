@@ -1,4 +1,4 @@
 package ru.netology.filestorage.service;
 
-public interface UserCredentialsService {
+public interface UsersService {
 }

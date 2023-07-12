@@ -16,8 +16,8 @@ public class Role {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String rolename;
+    private String name;
 
     @OneToMany(mappedBy = "role")
-    private Set<UserCredentials> userCredentialsSet = new HashSet<>();
+    private Set<User> usersSet = new HashSet<>();
 }

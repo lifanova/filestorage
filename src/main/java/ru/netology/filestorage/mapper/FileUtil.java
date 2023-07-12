@@ -11,16 +11,16 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import ru.netology.filestorage.model.entity.FileEntity;
-import ru.netology.filestorage.service.impl.UserCredentialsServiceImpl;
+import ru.netology.filestorage.service.impl.UsersServiceImpl;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 
 @Component
 public class FileUtil {
-    private final UserCredentialsServiceImpl userCredentialsService;
+    private final UsersServiceImpl userCredentialsService;
 
-    public FileUtil(UserCredentialsServiceImpl userCredentialsService) {
+    public FileUtil(UsersServiceImpl userCredentialsService) {
         this.userCredentialsService = userCredentialsService;
     }
 

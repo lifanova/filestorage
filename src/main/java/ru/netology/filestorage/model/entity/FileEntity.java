@@ -36,6 +36,6 @@ public class FileEntity {
     private byte[] bytes;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_credentials_id", referencedColumnName = "id")
-    private UserCredentials userCredentials;
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
 }
