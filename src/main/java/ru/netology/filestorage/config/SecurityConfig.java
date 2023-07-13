@@ -22,8 +22,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         auth.jdbcAuthentication()
                 .dataSource(dataSource)
                 .usersByUsernameQuery("select login, password, 'true' from users where login = ?")
-                .authoritiesByUsernameQuery("select u.login, r.name from users u join roles r on r.id = u.role_id where login = ?")
-                .rolePrefix("ROLE_");
+                .authoritiesByUsernameQuery("select u.login, r.name from users u join role r on r.id = u.role_id where login = ?");
+                //.rolePrefix("ROLE_");
     }
 
     protected void configure(HttpSecurity http) throws Exception {
@@ -78,10 +78,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }*/
 
 
-    @Bean
-    public PasswordEncoder encoder() {
-        return new BCryptPasswordEncoder();
-    }
+//    @Bean
+//    public PasswordEncoder encoder() {
+//        return new BCryptPasswordEncoder();
+//    }
 }
 
 

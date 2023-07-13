@@ -1,5 +1,5 @@
-insert into roles (name) values ('admin');
-insert into roles (name) values ('user');
+insert into role (name) values ('admin');
+insert into role (name) values ('user');
 
-insert into users (login, password, role_id) values ('admin', 'fhjfhgkrhe', 1);
-insert into users (login, password, role_id) values ('user', 'fhjfhgkrhe', 2);
+insert into users (login, password, role_id) values ('admin', 'admin', 1);
+insert into users (login, password, role_id) values ('user', 'user', 2);
