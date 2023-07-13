@@ -17,6 +17,6 @@ public interface FileRepository extends JpaRepository<FileEntity, Long> {
 
     @Query(value = "from FileEntity f where f.user.id = :id",
             countQuery = "select count(f) from FileEntity f where f.user.id = :id")
-    Page<FileEntity> findFilesByUserCredentialsId(@Param("id") Long id, Pageable pageable);
+    Page<FileEntity> findFilesByUserId(@Param("id") Long id, Pageable pageable);
 
 }

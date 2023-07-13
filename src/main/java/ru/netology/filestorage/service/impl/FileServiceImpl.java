@@ -32,7 +32,7 @@ public class FileServiceImpl implements FileService {
     public Page<FileDto> filesList(Optional<String> sort, Optional<Integer> page, Optional<Integer> limit) {
         Long userCredentialsId = fileUtil.getFileOwnerUserCredentialsId();
         PageRequest pageRequest = PageRequest.of(page.orElse(0), limit.orElse(10), Sort.Direction.ASC, sort.orElse("id"));
-        Page<FileEntity> pageFile = fileRepository.findFilesByUserCredentialsId(userCredentialsId, pageRequest);
+        Page<FileEntity> pageFile = fileRepository.findFilesByUserId(userCredentialsId, pageRequest);
 
         return mapperUtil.mapEntityIntoDto(pageFile, FileDto.class);
     }

@@ -16,6 +16,7 @@ import ru.netology.filestorage.service.impl.FileServiceImpl;
 import java.util.Optional;
 
 @RestController
+@RequestMapping(path = "/cloud")
 public class FileController implements FileStorageApi {
     private final FileServiceImpl fileService;
 
@@ -81,7 +82,7 @@ public class FileController implements FileStorageApi {
      *
      * @param filename
      */
-    @DeleteMapping(path = "file")
+    @DeleteMapping(path = "/file")
     public void deleteFile(@RequestParam String filename) {
         fileService.deleteFile(filename);
     }
