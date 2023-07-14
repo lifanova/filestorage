@@ -1,44 +1,61 @@
 package ru.netology.filestorage.service.impl;
 
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import ru.netology.filestorage.exception.ErrorInputData;
-import ru.netology.filestorage.mapper.FileUtil;
 import ru.netology.filestorage.mapper.MapperUtil;
 import ru.netology.filestorage.model.dto.EditNameRequest;
 import ru.netology.filestorage.model.dto.FileDto;
 import ru.netology.filestorage.model.entity.FileEntity;
+import ru.netology.filestorage.model.entity.User;
 import ru.netology.filestorage.repository.FileRepository;
 import ru.netology.filestorage.service.FileService;
+import ru.netology.filestorage.service.UsersService;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
 public class FileServiceImpl implements FileService {
     private final FileRepository fileRepository;
-    private final FileUtil fileUtil;
+    private final UsersService usersService;
     private final MapperUtil mapperUtil;
 
-    public FileServiceImpl(FileRepository fileRepository, FileUtil fileUtil, MapperUtil mapperUtil) {
+    public FileServiceImpl(FileRepository fileRepository, UsersService usersService, MapperUtil mapperUtil) {
         this.fileRepository = fileRepository;
-        this.fileUtil = fileUtil;
+        this.usersService = usersService;
         this.mapperUtil = mapperUtil;
     }
 
     public Page<FileDto> filesList(Optional<String> sort, Optional<Integer> page, Optional<Integer> limit) {
-        Long userCredentialsId = fileUtil.getFileOwnerUserCredentialsId();
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = usersService.getByUsername(username);
+        // todo  - user check on existing
+
         PageRequest pageRequest = PageRequest.of(page.orElse(0), limit.orElse(10), Sort.Direction.ASC, sort.orElse("id"));
-        Page<FileEntity> pageFile = fileRepository.findFilesByUserId(userCredentialsId, pageRequest);
+        Page<FileEntity> pageFile = fileRepository.findFilesByUserId(user.getId(), pageRequest);
 
         return mapperUtil.mapEntityIntoDto(pageFile, FileDto.class);
     }
 
     public FileEntity getFile(String filename) {
-        Optional<FileEntity> entity = fileRepository.findByName(fileUtil.getFileOwnerUserCredentialsId(), filename);
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = usersService.getByUsername(username);
+        // todo  - user check on existing
+
+        Optional<FileEntity> entity = fileRepository.findByName(user.getId(), filename);
 
         if (entity.isEmpty()) {
             throw new ErrorInputData("Файл по запросу не найден!");
@@ -50,7 +67,7 @@ public class FileServiceImpl implements FileService {
     public FileDto uploadFile(String filename, MultipartFile multipartFile) {
         FileEntity file = null;
         try {
-            file = fileUtil.createFileFromRequest(filename, multipartFile);
+            file = createFileFromRequest(filename, multipartFile);
         } catch (IOException e) {
             throw new ErrorInputData(e.getMessage());
         }
@@ -61,18 +78,28 @@ public class FileServiceImpl implements FileService {
     }
 
     public void editFilename(String oldFilename, EditNameRequest editNameRequest) {
-        Optional<FileEntity> entity = fileRepository.findByName(fileUtil.getFileOwnerUserCredentialsId(), oldFilename);
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = usersService.getByUsername(username);
+        // todo  - user check on existing
+
+        Optional<FileEntity> entity = fileRepository.findByName(user.getId(), oldFilename);
         if (entity.isEmpty()) {
             throw new ErrorInputData("Файл по запросу не найден!");
         }
 
-        FileEntity withNewFilename = fileUtil.editFilename(entity.get(), editNameRequest.getNewFilename());
+        FileEntity updatedFileEntity = entity.get();
+        updatedFileEntity.setName(editNameRequest.getNewFilename());
+        updatedFileEntity.setUpdated(LocalDateTime.now());
 
-        fileRepository.saveAndFlush(withNewFilename);
+        fileRepository.saveAndFlush(updatedFileEntity);
     }
 
     public void deleteFile(String filename) {
-        Optional<FileEntity> entity = fileRepository.findByName(fileUtil.getFileOwnerUserCredentialsId(), filename);
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = usersService.getByUsername(username);
+        // todo  - user check on existing
+
+        Optional<FileEntity> entity = fileRepository.findByName(user.getId(), filename);
         if (entity.isEmpty()) {
             throw new ErrorInputData("Файл по запросу не найден!");
         }
@@ -80,4 +107,23 @@ public class FileServiceImpl implements FileService {
         // TODO: вернуть ответ
         fileRepository.deleteById(entity.get().getId());
     }
+
+
+    public FileEntity createFileFromRequest(String filename, MultipartFile multipartFile) throws IOException {
+        FileEntity file = new FileEntity();
+        file.setName(filename);
+        file.setBytes(multipartFile.getBytes());
+        file.setSize(multipartFile.getBytes().length);
+        file.setMimetype(multipartFile.getContentType());
+        file.setCreated(LocalDateTime.now());
+        file.setUpdated(LocalDateTime.now());
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = usersService.getByUsername(username);
+        file.setUser(user);
+
+        return file;
+    }
+
+
 }

@@ -9,6 +9,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.sql.DataSource;
+import java.security.SecureRandom;
 
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
@@ -33,7 +34,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // метод hi доступен без регистрации
         // hasAuthority() - чтобы получить доступ к методу read, должно быть разрешение read
         // .anyRequest().authenticated() - все остальные запросы, которые остались, должны быть аутентифицированы
+
         http.formLogin()
+                .and()
+                .authorizeRequests().antMatchers("/login").permitAll()
+                .and()
+                .authorizeRequests().anyRequest().authenticated();
+       /* http.formLogin()
                 .and()
                 .authorizeRequests().antMatchers("/hi").permitAll()
                 .and()
@@ -41,7 +48,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests().antMatchers("/write").hasAuthority("write")
                 .and()
-                .authorizeRequests().anyRequest().authenticated();
+                .authorizeRequests().anyRequest().authenticated();*/
     }
 
     // сконфигурировать пользователей нашего приложения
@@ -78,10 +85,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }*/
 
 
-//    @Bean
-//    public PasswordEncoder encoder() {
-//        return new BCryptPasswordEncoder();
-//    }
+    @Bean
+    public PasswordEncoder encoder() {
+        return new BCryptPasswordEncoder(12, new SecureRandom());
+    }
 }
 
 

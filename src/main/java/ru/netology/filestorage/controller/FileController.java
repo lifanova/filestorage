@@ -1,13 +1,17 @@
 package ru.netology.filestorage.controller;
 
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.netology.filestorage.api.FileStorageApi;
-import ru.netology.filestorage.mapper.FileUtil;
 import ru.netology.filestorage.model.dto.EditNameRequest;
 import ru.netology.filestorage.model.dto.FileDto;
 import ru.netology.filestorage.model.entity.FileEntity;
@@ -49,7 +53,7 @@ public class FileController implements FileStorageApi {
     public ResponseEntity<MultiValueMap<String, Object>> getFile(@RequestParam String filename) {
         FileEntity fileEntity = fileService.getFile(filename);
 
-        return ResponseEntity.ok(FileUtil.createFormData(fileEntity));
+        return ResponseEntity.ok(createFormData(fileEntity));
     }
 
     /**
@@ -85,5 +89,20 @@ public class FileController implements FileStorageApi {
     @DeleteMapping(path = "/file")
     public void deleteFile(@RequestParam String filename) {
         fileService.deleteFile(filename);
+    }
+
+
+    private MultiValueMap<String, Object> createFormData(FileEntity fileEntity){
+        MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
+        ByteArrayResource byteArrayResource = new ByteArrayResource(fileEntity.getBytes());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.valueOf(fileEntity.getMimetype()));
+        headers.setContentLength(fileEntity.getSize());
+
+        HttpEntity<Resource> entity = new HttpEntity<>(byteArrayResource, headers);
+        formData.add("file", entity);
+
+        return formData;
     }
 }
