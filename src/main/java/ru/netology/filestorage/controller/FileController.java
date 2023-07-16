@@ -92,15 +92,15 @@ public class FileController implements FileStorageApi {
     }
 
 
-    private MultiValueMap<String, Object> createFormData(FileEntity fileEntity){
-        MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
-        ByteArrayResource byteArrayResource = new ByteArrayResource(fileEntity.getBytes());
-
+    private MultiValueMap<String, Object> createFormData(FileEntity fileEntity) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.valueOf(fileEntity.getMimetype()));
         headers.setContentLength(fileEntity.getSize());
 
+        ByteArrayResource byteArrayResource = new ByteArrayResource(fileEntity.getBytes());
         HttpEntity<Resource> entity = new HttpEntity<>(byteArrayResource, headers);
+
+        MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
         formData.add("file", entity);
 
         return formData;
