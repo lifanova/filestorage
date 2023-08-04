@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public interface AuthApi {
-    ResponseEntity<AuthResponse> authenticate(AuthRequest authRequest);
+    ResponseEntity<AuthResponse> login(AuthRequest authRequest);
 
     ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response, String authTokenHeader);
 }
