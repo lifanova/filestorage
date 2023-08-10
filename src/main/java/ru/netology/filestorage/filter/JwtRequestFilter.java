@@ -39,12 +39,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             login = jwtUtil.extractUsername(jwt);
         }
 
-
-//        if (jwt != null && jwtBlackListService.isBlacklisted(jwt)) {
-//            httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-//            return;
-//        }
-
         if (login != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             User user = usersService.getByUsername(login);
 
