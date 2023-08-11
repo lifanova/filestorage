@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Component
-@PropertySource("classpath:application.properties")
+@PropertySource(value = {"classpath:application.properties"})
 @Getter
 @Setter
 public class JwtUtil {

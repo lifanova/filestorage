@@ -1,7 +1,7 @@
 package ru.netology.filestorage.service;
 
-import ru.netology.filestorage.model.entity.User;
+import org.springframework.security.core.userdetails.UserDetails;
 
 public interface UsersService {
-    User getByUsername(String username);
+    UserDetails loadUserByUsername(String username);
 }
