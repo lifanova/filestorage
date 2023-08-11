@@ -23,11 +23,15 @@ public class UsersServiceImpl implements UsersService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return new UserDetailsImpl(getByUsername(username));
+    }
+
+    public User getByUsername(String username) throws UsernameNotFoundException {
         Optional<User> entity = userRepository.findByName(username);
         if (entity.isEmpty()) {
             throw new ErrorInputData("Пользователь по запросу не найден!");
         }
 
-        return new UserDetailsImpl(entity.get());
+        return entity.get();
     }
 }
