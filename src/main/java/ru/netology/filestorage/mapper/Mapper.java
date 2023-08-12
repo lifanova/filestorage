@@ -5,10 +5,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MapperUtil {
+public class Mapper {
     private final ModelMapper modelMapper;
 
-    public MapperUtil(ModelMapper modelMapper) {
+    public Mapper(ModelMapper modelMapper) {
         this.modelMapper = modelMapper;
     }
 

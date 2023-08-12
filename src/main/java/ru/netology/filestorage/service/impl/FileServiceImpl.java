@@ -4,11 +4,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.netology.filestorage.exception.ErrorInputData;
-import ru.netology.filestorage.mapper.MapperUtil;
+import ru.netology.filestorage.mapper.Mapper;
 import ru.netology.filestorage.model.dto.EditNameRequest;
 import ru.netology.filestorage.model.dto.FileDto;
 import ru.netology.filestorage.model.entity.FileEntity;
@@ -25,12 +24,12 @@ import java.util.Optional;
 public class FileServiceImpl implements FileService {
     private final FileRepository fileRepository;
     private final UsersService usersService;
-    private final MapperUtil mapperUtil;
+    private final Mapper mapper;
 
-    public FileServiceImpl(FileRepository fileRepository, UsersService usersService, MapperUtil mapperUtil) {
+    public FileServiceImpl(FileRepository fileRepository, UsersService usersService, Mapper mapper) {
         this.fileRepository = fileRepository;
         this.usersService = usersService;
-        this.mapperUtil = mapperUtil;
+        this.mapper = mapper;
     }
 
     public Page<FileDto> filesList(Optional<String> sort, Optional<Integer> page, Optional<Integer> limit) {
@@ -41,7 +40,7 @@ public class FileServiceImpl implements FileService {
         PageRequest pageRequest = PageRequest.of(page.orElse(0), limit.orElse(10), Sort.Direction.ASC, sort.orElse("id"));
         Page<FileEntity> pageFile = fileRepository.findFilesByUserId(user.getId(), pageRequest);
 
-        return mapperUtil.mapEntityIntoDto(pageFile, FileDto.class);
+        return mapper.mapEntityIntoDto(pageFile, FileDto.class);
     }
 
     public FileEntity getFile(String filename) {
@@ -68,7 +67,7 @@ public class FileServiceImpl implements FileService {
 
         FileEntity savedFile = fileRepository.saveAndFlush(file);
 
-        return mapperUtil.mapEntityIntoDto(savedFile, FileDto.class);
+        return mapper.mapEntityIntoDto(savedFile, FileDto.class);
     }
 
     public void editFilename(String oldFilename, EditNameRequest editNameRequest) {
