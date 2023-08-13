@@ -11,23 +11,23 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import ru.netology.filestorage.filter.JwtRequestFilter;
-import ru.netology.filestorage.service.impl.UsersServiceImpl;
+import ru.netology.filestorage.service.impl.AuthServiceImpl;
 
 import java.security.SecureRandom;
 
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-       private final UsersServiceImpl usersService;
+       private final AuthServiceImpl authService;
        private final JwtRequestFilter jwtRequestFilter;
 
-    public SecurityConfig(UsersServiceImpl usersService, JwtRequestFilter jwtRequestFilter) {
-        this.usersService = usersService;
+    public SecurityConfig(AuthServiceImpl authService, JwtRequestFilter jwtRequestFilter) {
+        this.authService = authService;
         this.jwtRequestFilter = jwtRequestFilter;
     }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(usersService).passwordEncoder(encoder());
+        auth.userDetailsService(authService).passwordEncoder(encoder());
     }
 
     @Override

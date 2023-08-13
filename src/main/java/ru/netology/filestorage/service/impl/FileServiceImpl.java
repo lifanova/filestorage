@@ -13,8 +13,8 @@ import ru.netology.filestorage.model.dto.FileDto;
 import ru.netology.filestorage.model.entity.FileEntity;
 import ru.netology.filestorage.model.entity.User;
 import ru.netology.filestorage.repository.FileRepository;
+import ru.netology.filestorage.service.AuthService;
 import ru.netology.filestorage.service.FileService;
-import ru.netology.filestorage.service.UsersService;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -23,18 +23,18 @@ import java.util.Optional;
 @Service
 public class FileServiceImpl implements FileService {
     private final FileRepository fileRepository;
-    private final UsersService usersService;
+    private final AuthService authService;
     private final Mapper mapper;
 
-    public FileServiceImpl(FileRepository fileRepository, UsersService usersService, Mapper mapper) {
+    public FileServiceImpl(FileRepository fileRepository, AuthService authService, Mapper mapper) {
         this.fileRepository = fileRepository;
-        this.usersService = usersService;
+        this.authService = authService;
         this.mapper = mapper;
     }
 
     public Page<FileDto> filesList(Optional<String> sort, Optional<Integer> page, Optional<Integer> limit) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = usersService.getByUsername(username);
+        User user = authService.getByUsername(username);
         // todo  - user check on existing
 
         PageRequest pageRequest = PageRequest.of(page.orElse(0), limit.orElse(10), Sort.Direction.ASC, sort.orElse("id"));
@@ -45,7 +45,7 @@ public class FileServiceImpl implements FileService {
 
     public FileEntity getFile(String filename) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = usersService.getByUsername(username);
+        User user = authService.getByUsername(username);
         // todo  - user check on existing
 
         Optional<FileEntity> entity = fileRepository.findByName(user.getId(), filename);
@@ -72,7 +72,7 @@ public class FileServiceImpl implements FileService {
 
     public void editFilename(String oldFilename, EditNameRequest editNameRequest) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = usersService.getByUsername(username);
+        User user = authService.getByUsername(username);
         // todo  - user check on existing
 
         Optional<FileEntity> entity = fileRepository.findByName(user.getId(), oldFilename);
@@ -89,7 +89,7 @@ public class FileServiceImpl implements FileService {
 
     public void deleteFile(String filename) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = usersService.getByUsername(username);
+        User user = authService.getByUsername(username);
         // todo  - user check on existing
 
         Optional<FileEntity> entity = fileRepository.findByName(user.getId(), filename);
@@ -112,7 +112,7 @@ public class FileServiceImpl implements FileService {
         file.setUpdated(LocalDateTime.now());
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = usersService.getByUsername(username);
+        User user = authService.getByUsername(username);
         file.setUser(user);
 
         return file;

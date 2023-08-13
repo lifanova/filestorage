@@ -6,8 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import ru.netology.filestorage.model.entity.User;
-import ru.netology.filestorage.service.UsersService;
+import ru.netology.filestorage.service.AuthService;
 import ru.netology.filestorage.util.JwtUtil;
 
 import javax.servlet.FilterChain;
@@ -18,13 +17,11 @@ import java.io.IOException;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
-    private final UsersService usersService;
-    //private final JwtBlackListService jwtBlackListService;
+    private final AuthService authService;
     private final JwtUtil jwtUtil;
 
-    public JwtRequestFilter(UsersService usersService, JwtUtil jwtUtil) {
-        this.usersService = usersService;
-//        this.jwtBlackListService = jwtBlackListService;
+    public JwtRequestFilter(AuthService authService, JwtUtil jwtUtil) {
+        this.authService = authService;
         this.jwtUtil = jwtUtil;
     }
 
@@ -41,7 +38,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
 
         if (login != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails user = usersService.loadUserByUsername(login);
+            UserDetails user = authService.loadUserByUsername(login);
 
             UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
                     new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
