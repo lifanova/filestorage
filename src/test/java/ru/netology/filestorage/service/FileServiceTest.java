@@ -9,9 +9,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.userdetails.UserDetails;
 import ru.netology.filestorage.mapper.Mapper;
 import ru.netology.filestorage.model.dto.EditNameRequest;
 import ru.netology.filestorage.model.entity.FileEntity;
+import ru.netology.filestorage.model.entity.User;
 import ru.netology.filestorage.repository.FileRepository;
 import ru.netology.filestorage.service.impl.FileServiceImpl;
 
@@ -24,6 +26,9 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 public class FileServiceTest {
+    private static final String FILENAME = "testFile";
+    private static final String NEW_FILENAME = "updatedFile";
+    private static final String TEXT = "Hello, world!";
     private FileService fileService;
 
     @Mock
@@ -36,22 +41,23 @@ public class FileServiceTest {
     private Mapper mapper;
 
     private FileEntity file;
+    private User user;
 
     @BeforeEach
     void setUp() {
         fileService = new FileServiceImpl(fileRepository, authService, mapper);
 
-        file = new FileEntity();
-        file.setId(1L);
-        file.setName("testFile");
+        User user = authService.getByUsername("admin");
+        file = new FileEntity(1L, FILENAME, user);
 
         openMocks(this);
     }
 
     @Test
-    @DisplayName("Сервис. Список файлов в хранилище")
+    @DisplayName("FileService. Список файлов в хранилище")
     void listFiles() {
         Page<FileEntity> pageFile = new PageImpl<>(Collections.singletonList(file));
+
         when(fileRepository.findFilesByUserId(anyLong(), any())).thenReturn(pageFile);
         Page<Object> pageObject = new PageImpl<>(List.of(new Object()));
         when(mapper.mapEntityIntoDto(any(), any())).thenReturn(pageObject);
@@ -60,24 +66,18 @@ public class FileServiceTest {
     }
 
     @Test
-    @DisplayName("Сервис. Загрузка файла в хранилище")
+    @DisplayName("FileService. Загрузка файла в хранилище")
     void uploadFile() {
-        MockMultipartFile mockMultipartFile
-                = new MockMultipartFile(
-                "file",
-                "hello.txt",
-                MediaType.TEXT_PLAIN_VALUE,
-                "Hello, World!".getBytes()
-        );
+        MockMultipartFile mockFile = new MockMultipartFile("file", "hello.txt", MediaType.TEXT_PLAIN_VALUE, TEXT.getBytes());
 
         when(fileRepository.saveAndFlush(any())).thenReturn(file);
         //when(mapper.mapEntityIntoDto(any(), any())).thenReturn(new FileDto());
 
-        fileService.uploadFile(mockMultipartFile.getName(), mockMultipartFile);
+        fileService.uploadFile(mockFile.getName(), mockFile);
     }
 
     @Test
-    @DisplayName("Сервис. Получение файла в хранилище")
+    @DisplayName("FileService. Получение файла в хранилище")
     void getFile() {
         when(fileRepository.findByName(anyLong(), anyString())).thenReturn(Optional.of(file));
 
@@ -85,15 +85,15 @@ public class FileServiceTest {
     }
 
     @Test
-    @DisplayName("Сервис. Изменение названия файла")
+    @DisplayName("FileService. Изменение названия файла")
     void editFilename() {
         when(fileRepository.findByName(anyLong(), anyString())).thenReturn(Optional.of(file));
 
-        fileService.editFilename("oldname", new EditNameRequest("newname"));
+        fileService.editFilename(FILENAME, new EditNameRequest(NEW_FILENAME));
     }
 
     @Test
-    @DisplayName("Сервис. Удаление файла")
+    @DisplayName("FileService. Удаление файла")
     void deleteFile() {
         when(fileRepository.findByName(anyLong(), anyString())).thenReturn(Optional.of(file));
 

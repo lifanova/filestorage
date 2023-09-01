@@ -39,4 +39,14 @@ public class FileEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    public FileEntity(String name, User user) {
+        this.name = name;
+        this.user = user;
+    }
+    public FileEntity(Long id, String name, User user) {
+        this.id = id;
+        this.name = name;
+        this.user = user;
+    }
 }

@@ -7,6 +7,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.netology.filestorage.exception.ErrorInputData;
+import ru.netology.filestorage.exception.FileStorageError;
+import ru.netology.filestorage.exception.UserNotFoundException;
 import ru.netology.filestorage.mapper.Mapper;
 import ru.netology.filestorage.model.dto.EditNameRequest;
 import ru.netology.filestorage.model.dto.FileDto;
@@ -35,7 +37,9 @@ public class FileServiceImpl implements FileService {
     public Page<FileDto> filesList(Optional<String> sort, Optional<Integer> page, Optional<Integer> limit) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = authService.getByUsername(username);
-        // todo  - user check on existing
+        if (user == null) {
+            throw new FileStorageError("[filesList]: ERROR: Пользователь отсутствует в БД!");
+        }
 
         PageRequest pageRequest = PageRequest.of(page.orElse(0), limit.orElse(10), Sort.Direction.ASC, sort.orElse("id"));
         Page<FileEntity> pageFile = fileRepository.findFilesByUserId(user.getId(), pageRequest);
@@ -46,12 +50,14 @@ public class FileServiceImpl implements FileService {
     public FileEntity getFile(String filename) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = authService.getByUsername(username);
-        // todo  - user check on existing
+        if (user == null) {
+            throw new FileStorageError("[getFile]: ERROR: Пользователь отсутствует в БД!");
+        }
 
         Optional<FileEntity> entity = fileRepository.findByName(user.getId(), filename);
 
         if (entity.isEmpty()) {
-            throw new ErrorInputData("Файл по запросу не найден!");
+            throw new FileStorageError("[getFile]: ERROR: Файл по запросу не найден!");
         }
 
         return entity.get();
@@ -62,7 +68,7 @@ public class FileServiceImpl implements FileService {
         try {
             file = createFileFromRequest(filename, multipartFile);
         } catch (IOException e) {
-            throw new ErrorInputData(e.getMessage());
+            throw new ErrorInputData("[uploadFile]: Error: " + e.getMessage());
         }
 
         FileEntity savedFile = fileRepository.saveAndFlush(file);
@@ -73,11 +79,13 @@ public class FileServiceImpl implements FileService {
     public void editFilename(String oldFilename, EditNameRequest editNameRequest) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = authService.getByUsername(username);
-        // todo  - user check on existing
+        if (user == null) {
+            throw new FileStorageError("[editFilename]: ERROR: Пользователь отсутствует в БД!");
+        }
 
         Optional<FileEntity> entity = fileRepository.findByName(user.getId(), oldFilename);
         if (entity.isEmpty()) {
-            throw new ErrorInputData("Файл по запросу не найден!");
+            throw new FileStorageError("Файл по запросу не найден!");
         }
 
         FileEntity updatedFileEntity = entity.get();
@@ -88,13 +96,20 @@ public class FileServiceImpl implements FileService {
     }
 
     public void deleteFile(String filename) {
+        if (filename.isBlank()) {
+            throw new ErrorInputData("[deleteFile]: ERROR: не указано название файла!");
+        }
+
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = authService.getByUsername(username);
-        // todo  - user check on existing
+
+        if (user == null) {
+            throw new FileStorageError("[deleteFile]: ERROR: Пользователь отсутствует в БД!");
+        }
 
         Optional<FileEntity> entity = fileRepository.findByName(user.getId(), filename);
         if (entity.isEmpty()) {
-            throw new ErrorInputData("Файл по запросу не найден!");
+            throw new FileStorageError("[deleteFile]: ERROR: Файл по запросу не найден!");
         }
 
         // TODO: вернуть ответ
@@ -103,20 +118,24 @@ public class FileServiceImpl implements FileService {
 
 
     public FileEntity createFileFromRequest(String filename, MultipartFile multipartFile) throws IOException {
-        FileEntity file = new FileEntity();
-        file.setName(filename);
+        if (filename.isBlank()) {
+            throw new ErrorInputData("[createFileFromRequest]: ERROR: не указано название файла!");
+        }
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = authService.getByUsername(username);
+
+        if (user == null) {
+            throw new FileStorageError("[createFileFromRequest]: ERROR: Пользователь отсутствует в БД!");
+        }
+
+        FileEntity file = new FileEntity(filename, user);
         file.setBytes(multipartFile.getBytes());
         file.setSize(multipartFile.getBytes().length);
         file.setMimetype(multipartFile.getContentType());
         file.setCreated(LocalDateTime.now());
         file.setUpdated(LocalDateTime.now());
 
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = authService.getByUsername(username);
-        file.setUser(user);
-
         return file;
     }
-
-
 }
